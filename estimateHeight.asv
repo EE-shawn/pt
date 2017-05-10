@@ -1,0 +1,19 @@
+function [ h ] = estimateHeight( VP, p1, p2 )
+    p3 = [538, 107];
+    p4 = [538, 340];
+
+    vp1 = [VP(1,1), VP(1,2)]; 
+    vp2 = [VP(2,1), VP(2,2)];
+    
+    a = (vp1(2) - vp2(2)) / (vp1(1) - vp2(1));
+    b = vp1(2) - (a * vp1(1));
+    
+    a0 = (p4(2) - p2(2))/(p4(1) - p2(1));
+    a
+    
+    estHeight = 1.73;
+    icr = abs(p2(2) - p3(2)) / abs(p2(2) - p1(2));
+    
+    h = icr * estHeight;
+end
+
