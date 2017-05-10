@@ -42,16 +42,14 @@ numImg = length(imgDir);
 %     disp(i);
 % end
 
-fname = strcat(['set0v6/set00_V006_', int2str(162), '.png']);
+fname = strcat(['set0v6/set00_V006_', int2str(168), '.png']);
 imgColor = imread(fname);
-
-
-
+  
 figure(1);
 imshow(imgColor);
 [x,y] = getpts;
 
-[VP, eH, p3, p4] = setupHeight(162, 1.7, [430, 80], [430, 350]);
+[VP, eH, p3, p4] = setupHeight(162, 1.7, [430, 80], [430, 330]);
 
 p1 = [x(1), y(1)];
 p2 = [x(2), y(2)];
