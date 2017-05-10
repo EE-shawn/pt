@@ -2,7 +2,7 @@ function [ h ] = estimateHeight( VP, estHeight, p1, p2, p3, p4 )
     vp1 = VP(:,1)'; 
     vp2 = VP(:,2)'; 
     
-    a = 0;
+    a = (vp2(2) - vp1(2)) / (vp2(1) - vp1(1));
     b = vp2(2) - (a * vp2(1));
     
     a0 = (p4(2) - p2(2))/(p4(1) - p2(1));
