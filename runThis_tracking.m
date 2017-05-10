@@ -8,50 +8,53 @@ obj_track.videoPlayer = vision.VideoPlayer('Position', [20, 400, 800, 800]);    
 tracks = struct(...
             'id', {}, ...
             'bbox', {}, ...
-            'x', {}, ...
-            'P',{}, ...
-            'age', {}, ...
+            'x', {}, ...                            % For states
+            'P',{}, ...                             % For error covariance matrix
+            'age', {}, ...          
             'totalVisibleCount', {}, ...
             'consecutiveInvisibleCount', {});
 %% Constants and initialization
-dt = 1/30;                      % frame rate
+dt = 1/30;                                          % frame rate
 % Constant velocity model
+% states = [x x_dot y y_dot]'
 A = [1 dt 0 0;
      0 1 0 0;
      0 0 1 dt;
      0 0 0 1];
 % measuring the position of the object (centroid in this case)
+% z = [x y]'
 H = [1 0 0 0;
      0 0 1 0];
-x0 = [0,0,0,0]'; P0 = 100*eye(4);
+% Initialization 
+x0 = [0,0,0,0]'; P0 = 100*eye(4);       % initial guess for states a
+
+% Change these values to tune kalman filter 
 q = [20,20,20,20];                      % process noise, denotes trust level
-r = [15,15]; 
+r = [15,15];                            % measurement noise
+
 nextId = 1;
 
-peopleDetector = vision.PeopleDetector;
+peopleDetector = vision.PeopleDetector; 
 %% Main loop
-isDetection = false;
-for i = 1:885
-    fname = strcat(['set0v6/set00_V006_', int2str(i), '.png']);
+isDetection = false;                    % correction step is performed when a measurement is available
+
+for j = 1:885
+    fname = strcat(['set0v6/set00_V006_', int2str(j), '.png']);
     img = imread(fname);
     frame = img;
     [bboxes,scores] = step(peopleDetector, img);
     if size(scores,1)>0 % valid detection
         isDetection = true;
-        centroids = [bboxes(:,1)+bboxes(:,3)/2 bboxes(:,2)+bboxes(:,4)/2];  % centroids of the detection
+        centroids = [bboxes(:,1)+bboxes(:,3)/2 bboxes(:,2)+bboxes(:,4)/2];  % centroids of detections
         img = insertObjectAnnotation(img,'rectangle',bboxes,scores);
-%         imshow(img);
-%         hold on
-%         plot(centroids(:,1),centroids(:,2),'*r')
-%         pause(0.2);
-        obj_detect.videoPlayer.step(img)
+        obj_detect.videoPlayer.step(img)                                    % to show detections
     end
     %% Predict new locations
     for i = 1:length(tracks)
         bbox = tracks(i).bbox;
         % Predict the current location of the track
         
-        [z_pred,x_pred,P_pred] = predict_test(A,H,tracks(i).x,tracks(i).P,q);
+        [x_pred,P_pred] = predict_test(A,H,tracks(i).x,tracks(i).P,q);
         predCentroid = [x_pred(1) x_pred(3)];           % predicted centroid
         x0 = x_pred;
         P0 = P_pred;
@@ -88,7 +91,7 @@ for i = 1:885
         % using the new detection.
         z = centroid';
         
-        [z_corr,x_corr,P_corr] = correct_test(H,tracks(trackIdx).x,tracks(trackIdx).P,z,r);
+        [x_corr,P_corr] = correct_test(H,tracks(trackIdx).x,tracks(trackIdx).P,z,r);
         
         % Replace predicted bounding box with detected
         % bounding box.
@@ -179,18 +182,24 @@ for i = 1:885
             predictedTrackInds = ...
                 [reliableTracks(:).consecutiveInvisibleCount] > 0;
             isPredicted = cell(size(labels));
-            isPredicted(predictedTrackInds) = {' predicted'};
+            isPredicted(predictedTrackInds) = {' Predicted'};
             labels = strcat(labels, isPredicted);
             
-            % Draw the objects on the frame.
-            frame = insertObjectAnnotation(frame, 'rectangle', ...
-                bboxes, labels);
-            
-            % Draw the objects on the mask.;
+            ind = strcmp(isPredicted,' Predicted');      % find the indices for prediction
+            % Display the object, predicted objects are shown in red
+            if (sum(ind))
+                color = cell(1,length(labels));
+                color(:) = {'yellow'};
+                color(ind) = {'red'};
+                frame = insertObjectAnnotation(frame, 'rectangle', ...      % if prediction
+                        bboxes, labels,'Color',color);
+            else
+                frame = insertObjectAnnotation(frame, 'rectangle', ...      % if no prediction
+                    bboxes, labels);
+            end
         end
     end
     obj_track.videoPlayer.step(frame);
-%     imshow(frame)
     end
     isDetection = false;
 end
