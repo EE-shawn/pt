@@ -18,7 +18,7 @@ imgDir = dir(fullfile(datasetPath, '*.png'));
 numImg = length(imgDir);
 
 % Process imagess
-% for i = 1050: 1700
+% for i = 160: 1700
 %     disp(i);
 %     fname = strcat(['set0v6/set00_V006_', int2str(i), '.png']);
 %    
@@ -38,24 +38,24 @@ numImg = length(imgDir);
 %     
 %     % === Visualization ===
 %     visLineSegForVP(imgColor, lines, lineLabel, VP, img);
+%     
+%     disp(i);
 % end
 
-fname = strcat(['set0v6/set00_V006_', int2str(1054), '.png']);
+fname = strcat(['set0v6/set00_V006_', int2str(162), '.png']);
 imgColor = imread(fname);
-img = rgb2gray(imgColor);
-img = im2double(img);
-lines = lsd(img * 255);
-[VP, lineLabel] = vpDetectionFromLines(lines);
+
+
 
 figure(1);
 imshow(imgColor);
 [x,y] = getpts;
 
+[VP, eH, p3, p4] = setupHeight(162, 1.7, [430, 80], [430, 350]);
+
 p1 = [x(1), y(1)];
 p2 = [x(2), y(2)];
 
-disp(p2);
-
-h = estimateHeight(VP, p1, p2);
+h = estimateHeight(VP, eH, p1, p2, p3, p4);
 disp('Height:')
 disp(h)
