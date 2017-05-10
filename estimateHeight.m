@@ -15,7 +15,7 @@ function [ h ] = estimateHeight( VP, estHeight, p1, p2, p3, p4 )
     b = (p1(2) - a * p1(1));
     t = [p3(1), p3(1) * a + b];
     eH = abs(estHeight / (p3(2) - p4(2)));
-    icr = abs(t(2) - p4(2))  / abs(p3(2) - p4(2)) * abs(p1(2) / t(2));
+    icr = abs(t(2) - p4(2))  / abs(p3(2) - p4(2)) * abs(t(2) / p1(2));
     h = icr * estHeight;
 end
 
