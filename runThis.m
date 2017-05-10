@@ -1,5 +1,8 @@
+close all;
+
 peopleDetector = vision.PeopleDetector;
 
+figure(1);
 % Run people detector on all frames of the video
 for i = 1050:1865
     fname = strcat(['set0v6/set00_V006_', int2str(i), '.png']);
