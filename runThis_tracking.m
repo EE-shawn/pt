@@ -35,10 +35,12 @@ r = [15,15];                            % measurement noise
 nextId = 1;
 
 peopleDetector = vision.PeopleDetector; 
+h_thresh = 0.5;                         % Threshold for the height
+[VP, eH, p3, p4] = setupHeight(162, 1.7, [430, 80], [430, 350]); % setup for VP
 %% Main loop
 isDetection = false;                    % correction step is performed when a measurement is available
 
-for j = 1:885
+for j = 100:200
     fname = strcat(['set0v6/set00_V006_', int2str(j), '.png']);
     img = imread(fname);
     frame = img;
@@ -184,13 +186,32 @@ for j = 1:885
             isPredicted = cell(size(labels));
             isPredicted(predictedTrackInds) = {' Predicted'};
             labels = strcat(labels, isPredicted);
+            % Check the height of individual predictions
             
             ind = strcmp(isPredicted,' Predicted');      % find the indices for prediction
             % Display the object, predicted objects are shown in red
-            if (sum(ind))
+            if (sum(ind))   % if prediction
                 color = cell(1,length(labels));
                 color(:) = {'yellow'};
                 color(ind) = {'red'};
+                bbox_pred = bboxes;%(ind,:);
+                h = zeros(size(bbox_pred,1),1);
+                ind_h = logical(zeros(size(bbox_pred,1),1));
+                for k = 1:size(bbox_pred,1)
+                    points = bbox2points(bbox_pred(k,:));
+                    p1 = mean(points(1:2,:));
+                    p2 = mean(points(3:4,:));
+                    h(k) = estimateHeight(VP,eH,p1,p2,p3,p4);
+                    if h(k)<h_thresh
+                        % remove the prediction
+                        ind_h(k) = 1;
+                    else
+                        ind_h(k) = 0;
+                    end
+                end
+                bboxes(ind_h,:) = [];
+                labels(ind_h) = [];
+                color(ind_h) = [];
                 frame = insertObjectAnnotation(frame, 'rectangle', ...      % if prediction
                         bboxes, labels,'Color',color);
             else
