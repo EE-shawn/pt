@@ -8,7 +8,7 @@ function [ h ] = estimateHeight( VP, estHeight, p1, p2, p3, p4 )
     a0 = (p4(2) - p2(2))/(p4(1) - p2(1));
     b0 = p4(2) - (a0 * p2(1));
    
-    sy = (b - b0)/(a - a0); 
+    sy = (b - b0)/(a0 - a); 
     eV = [sy, sy * a + b];
     
     a = (p1(2) - eV(2)) / (p1(1) - eV(1));
