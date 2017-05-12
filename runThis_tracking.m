@@ -37,7 +37,7 @@ nextId = 1;
 
 peopleDetector = vision.PeopleDetector; % object for detectot
 
-h_thresh = 0.6;                         % Threshold for the height
+h_thresh = 0.7;                         % Threshold for the height
 
 [VP, eH, p3, p4] = setupHeight(206, 1.7, [430, 80], [430, 360]); % setup for VP
 %% Main loop
@@ -213,7 +213,7 @@ for j = 100:200
                         ind_h(k) = 0;
                     end
                 end
-                h
+                
                 % remove predictions that have height less than threshold
                 bbox_pred(~ind_h,:) = [];
                 ind_pred = zeros(size(bbox_pred,1),1);
@@ -224,7 +224,7 @@ for j = 100:200
                 bboxes(ind_pred,:) = [];
                 labels(ind_pred) = [];
                 color(ind_pred) = [];
-                color
+               
                 frame = insertObjectAnnotation(frame, 'rectangle', ...      % if prediction
                         bboxes, labels,'Color',color);
             else
