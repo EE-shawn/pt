@@ -1,6 +1,7 @@
 clear all;
 close all;
 clc;
+%addpath('/home/hafta/PhD/Courses/Sem II/CS 543/Project/pt/set0v6')
 %% Tracking multiple objects
 obj_detect.videoPlayer = vision.VideoPlayer('Position', [740, 400, 800, 800]);  % to show detections 
 obj_track.videoPlayer = vision.VideoPlayer('Position', [20, 400, 800, 800]);    % to show tracking
@@ -16,7 +17,7 @@ tracks = struct(...
 %% Constants and initialization
 dt = 1/30;                                          % frame rate
 % Constant velocity model
-% states = [x x_dot y y_dot]'
+% states = [x x_dot y y_dot]', 
 A = [1 dt 0 0;
      0 1 0 0;
      0 0 1 dt;
@@ -34,9 +35,11 @@ r = [15,15];                            % measurement noise
 
 nextId = 1;
 
-peopleDetector = vision.PeopleDetector; 
-h_thresh = 0.5;                         % Threshold for the height
-[VP, eH, p3, p4] = setupHeight(162, 1.7, [430, 80], [430, 350]); % setup for VP
+peopleDetector = vision.PeopleDetector; % object for detectot
+
+h_thresh = 0.6;                         % Threshold for the height
+
+[VP, eH, p3, p4] = setupHeight(206, 1.7, [430, 80], [430, 360]); % setup for VP
 %% Main loop
 isDetection = false;                    % correction step is performed when a measurement is available
 
@@ -189,12 +192,13 @@ for j = 100:200
             % Check the height of individual predictions
             
             ind = strcmp(isPredicted,' Predicted');      % find the indices for prediction
+            
             % Display the object, predicted objects are shown in red
             if (sum(ind))   % if prediction
                 color = cell(1,length(labels));
                 color(:) = {'yellow'};
                 color(ind) = {'red'};
-                bbox_pred = bboxes;%(ind,:);
+                bbox_pred = bboxes(ind,:);
                 h = zeros(size(bbox_pred,1),1);
                 ind_h = logical(zeros(size(bbox_pred,1),1));
                 for k = 1:size(bbox_pred,1)
@@ -209,9 +213,18 @@ for j = 100:200
                         ind_h(k) = 0;
                     end
                 end
-                bboxes(ind_h,:) = [];
-                labels(ind_h) = [];
-                color(ind_h) = [];
+                h
+                % remove predictions that have height less than threshold
+                bbox_pred(~ind_h,:) = [];
+                ind_pred = zeros(size(bbox_pred,1),1);
+                for m = 1:size(bbox_pred,1)
+                    ind_pred(m) = find(ismember(bboxes,bbox_pred(m,:),'rows'));
+                end
+                    
+                bboxes(ind_pred,:) = [];
+                labels(ind_pred) = [];
+                color(ind_pred) = [];
+                color
                 frame = insertObjectAnnotation(frame, 'rectangle', ...      % if prediction
                         bboxes, labels,'Color',color);
             else
